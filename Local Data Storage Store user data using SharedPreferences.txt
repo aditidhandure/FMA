@@ -1,0 +1,76 @@
+//MainActivity.kt: 
+package com.example.q12 
+import android.content.Context 
+import android.os.Bundle 
+import android.widget.* 
+import androidx.activity.ComponentActivity 
+class MainActivity : ComponentActivity() { 
+    private lateinit var nameInput: EditText 
+    private lateinit var emailInput: EditText 
+    private lateinit var saveButton: Button 
+    private lateinit var listView: ListView 
+    private lateinit var sharedPreferences: android.content.SharedPreferences 
+    override fun onCreate(savedInstanceState: Bundle?) { 
+        super.onCreate(savedInstanceState) 
+        setContentView(R.layout.activity_main) 
+        nameInput = findViewById(R.id.editTextName) 
+        emailInput = findViewById(R.id.editTextEmail) 
+        saveButton = findViewById(R.id.buttonSave) 
+        listView = findViewById(R.id.listViewData) 
+        sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE) 
+        loadData() 
+        saveButton.setOnClickListener { 
+            val name = nameInput.text.toString() 
+            val email = emailInput.text.toString() 
+            if (name.isNotEmpty() && email.isNotEmpty()) { 
+                val editor = sharedPreferences.edit() 
+                editor.putString("name", name) 
+
+ 
+                editor.putString("email", email) 
+                editor.apply() 
+                Toast.makeText(this, "Data Saved", Toast.LENGTH_SHORT).show() 
+                loadData() 
+            } else { 
+                Toast.makeText(this, "Please enter both fields", Toast.LENGTH_SHORT).show() 
+            } 
+        }   } 
+    private fun loadData() { 
+        val name = sharedPreferences.getString("name", "No Name") 
+        val email = sharedPreferences.getString("email", "No Email") 
+        val userList = listOf("Name: $name", "Email: $email") 
+        val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, userList) 
+        listView.adapter = adapter 
+    }    } 
+//Activity_main.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:orientation="vertical" 
+    android:padding="24dp"> 
+    <EditText 
+        android:id="@+id/editTextName" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:hint="Enter Name" 
+        android:inputType="textPersonName"/> 
+    <EditText 
+
+ 
+        android:id="@+id/editTextEmail" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:hint="Enter Email" 
+        android:inputType="textEmailAddress"/> 
+    <Button 
+        android:id="@+id/buttonSave" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:text="Save"/> 
+    <ListView 
+        android:id="@+id/listViewData" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content"/> 
+</LinearLayout>

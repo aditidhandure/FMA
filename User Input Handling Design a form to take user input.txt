@@ -1,0 +1,93 @@
+//MainActivity.kt: 
+package com.example.q4 
+ 
+import android.os.Bundle 
+import android.widget.Button 
+import android.widget.EditText 
+import android.widget.TextView 
+import androidx.activity.ComponentActivity 
+ 
+class MainActivity : ComponentActivity() { 
+    override fun onCreate(savedInstanceState: Bundle?) { 
+        super.onCreate(savedInstanceState) 
+        setContentView(R.layout.activity_main) 
+ 
+        val nameEditText = findViewById<EditText>(R.id.editTextName) 
+        val ageEditText = findViewById<EditText>(R.id.editTextAge) 
+        val emailEditText = findViewById<EditText>(R.id.editTextEmail) 
+        val submitButton = findViewById<Button>(R.id.buttonSubmit) 
+        val displayTextView = findViewById<TextView>(R.id.textViewDisplay) 
+ 
+        submitButton.setOnClickListener { 
+            val name = nameEditText.text.toString() 
+            val age = ageEditText.text.toString() 
+            val email = emailEditText.text.toString() 
+ 
+            val output = "Name: $name\nAge: $age\nEmail: $email" 
+            displayTextView.text = output 
+ 
+        } 
+    } 
+}
+
+
+//Activity_main.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:padding="20dp"> 
+ 
+    <LinearLayout 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:orientation="vertical"> 
+ 
+        <TextView 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Welcome, Android Mobile Class !" 
+            android:textSize="24sp" 
+            android:textStyle="bold" 
+            android:layout_gravity="center_horizontal" 
+            android:paddingBottom="24dp" /> 
+ 
+        <EditText 
+            android:id="@+id/editTextName" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:hint="Enter Name" 
+ 
+            android:inputType="textPersonName" /> 
+ 
+        <EditText 
+            android:id="@+id/editTextAge" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:hint="Enter Age" 
+            android:inputType="number" /> 
+ 
+        <EditText 
+            android:id="@+id/editTextEmail" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:hint="Enter Email" 
+            android:inputType="textEmailAddress" /> 
+ 
+        <Button 
+            android:id="@+id/buttonSubmit" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="Submit" 
+            android:layout_marginTop="16dp" /> 
+ 
+        <TextView 
+            android:id="@+id/textViewDisplay" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:text="" 
+            android:textSize="18sp" 
+            android:paddingTop="20dp" /> 
+ 
+    </LinearLayout> 
+</ScrollView>

@@ -1,0 +1,135 @@
+package com.example.blood 
+import androidx.compose.ui.tooling.preview.Preview
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+//import com.example.practical2.ui.theme.MaterialTheme
+import java.text.SimpleDateFormat
+import java.util.*
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    BirthdayScreen()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BirthdayScreen(modifier: Modifier = Modifier) {
+    val teamMembers = listOf(
+        Person("Yash Bhandari", "yash@mail.com", "9876543210", "2003-09-03", "O+"),
+        Person("Tushar Rasal", "tushar@mail.com", "8765432109", "2004-06-20", "A+"),
+        Person("Neel Patel", "neel@mail.com", "7654321098", "2003-04-12", "B+"),
+        Person("Sneh Bhandari", "sneh@mail.com", "9876543255", "2002-06-03", "O+"),
+        Person("Rahul Yadav", "rahul@mail.com", "9876543234", "2001-01-03", "O+"),
+        Person("Harsh Patel", "harsh@mail.com", "6543210987", "2002-12-25", "AB+")
+    )
+
+    val today = getCurrentDate()
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.birthday_bg), // Make sure you have a drawable named birthday_bg
+            contentDescription = "Birthday Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Birthday Wishes",
+                fontSize = 26.sp,
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            teamMembers.forEach { member ->
+                if (isBirthdayToday(member.dob, today)) {
+                    BirthdayMessage(member)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BirthdayMessage(member: Person) {
+    val textColor = getBloodGroupColor(member.bloodGroup)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Happy Birthday, ${member.name}!",
+            fontSize = 20.sp,
+            color = textColor
+        )
+    }
+}
+
+fun getCurrentDate(): String {
+    val sdf = SimpleDateFormat("MM-dd", Locale.getDefault())
+    return sdf.format(Date())
+}
+
+fun isBirthdayToday(dob: String, today: String): Boolean {
+    val dobFormatted = dob.substring(5) // MM-dd
+    return dobFormatted == today
+}
+
+fun getBloodGroupColor(bloodGroup: String): Color {
+    return when (bloodGroup) {
+        "A+" -> Color.Red
+        "A-" -> Color(0xFFFFA500)
+        "B+" -> Color.Yellow
+        "B-" -> Color(0xFF8B4513)
+        "O+" -> Color.Blue
+        "AB+" -> Color(0xFFFFD700)
+        else -> Color.White
+    }
+}
+
+data class Person(
+    val name: String,
+    val email: String,
+    val mobile: String,
+    val dob: String,
+    val bloodGroup: String
+)
+
+@Preview(showBackground = true)
+@Composable
+fun BirthdayScreenPreview() {
+    MaterialTheme  {
+        BirthdayScreen()
+    }
+}

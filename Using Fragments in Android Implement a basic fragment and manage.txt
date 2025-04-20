@@ -1,0 +1,123 @@
+//MainActivity.kt: 
+package com.example.q11 
+import android.os.Bundle 
+import android.widget.Button 
+import androidx.activity.ComponentActivity 
+import androidx.fragment.app.Fragment 
+import androidx.fragment.app.FragmentActivity 
+import com.example.q11.fragments.SecondFragment 
+import com.example.q11.fragments.WelcomeFragment 
+class MainActivity : FragmentActivity() { 
+    override fun onCreate(savedInstanceState: Bundle?) { 
+        super.onCreate(savedInstanceState) 
+        setContentView(R.layout.activity_main) 
+        supportFragmentManager.beginTransaction() 
+            .replace(R.id.fragmentContainer, WelcomeFragment()) 
+            .commit() 
+        val switchButton = findViewById<Button>(R.id.buttonSwitch) 
+        switchButton.setOnClickListener { 
+            replaceFragment(SecondFragment()) 
+        } 
+    } 
+    private fun replaceFragment(fragment: Fragment) { 
+        supportFragmentManager.beginTransaction() 
+            .replace(R.id.fragmentContainer, fragment) 
+            .addToBackStack(null) 
+            .commit() 
+    }   } 
+
+ 
+//WelcomeFragment.kt: 
+package com.example.q11.fragments 
+ 
+import android.os.Bundle 
+import android.view.LayoutInflater 
+import android.view.View 
+import android.view.ViewGroup 
+import androidx.fragment.app.Fragment 
+import com.example.q11.R 
+ 
+class WelcomeFragment : Fragment() { 
+    override fun onCreateView( 
+        inflater: LayoutInflater, container: ViewGroup?, 
+        savedInstanceState: Bundle? 
+    ): View? { 
+        return inflater.inflate(R.layout.fragment_welcome, container, false) 
+    } 
+} 
+ 
+//SecondActivity.kt: 
+package com.example.q11.fragments 
+ 
+import android.os.Bundle 
+import android.view.LayoutInflater 
+import android.view.View 
+import android.view.ViewGroup 
+import androidx.fragment.app.Fragment 
+import com.example.q11.R 
+ 
+class SecondFragment : Fragment() { 
+
+ 
+    override fun onCreateView( 
+        inflater: LayoutInflater, container: ViewGroup?, 
+        savedInstanceState: Bundle? 
+    ): View? { 
+        return inflater.inflate(R.layout.fragment_second, container, false) 
+    } 
+} 
+ 
+//Activity_main.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:orientation="vertical" 
+    android:padding="24dp"> 
+ 
+    <Button 
+        android:id="@+id/buttonSwitch" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:text="Switch Fragment" /> 
+ 
+    <FrameLayout 
+        android:id="@+id/fragmentContainer" 
+        android:layout_width="match_parent" 
+        android:layout_height="0dp" 
+        android:layout_weight="1" 
+        android:layout_marginTop="16dp"/> 
+</LinearLayout> 
+
+ 
+//Fragment_welcome.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<FrameLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:background="#FFE0B2" 
+    android:padding="24dp"> 
+    <TextView 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Welcome to the First Fragment!" 
+        android:textSize="20sp" 
+        android:layout_gravity="center" /> 
+</FrameLayout> 
+ 
+//Fragment_second.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<FrameLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:background="#C8E6C9"> 
+    <TextView 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="This is the Second Fragment!" 
+        android:textSize="20sp" 
+        android:layout_gravity="center" /> 
+</FrameLayout>

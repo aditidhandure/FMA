@@ -1,0 +1,34 @@
+
+
+MainActivity.kt: 
+package com.example.q1 
+ 
+import android.os.Bundle 
+import androidx.activity.ComponentActivity 
+ 
+class MainActivity : ComponentActivity() { 
+    override fun onCreate(savedInstanceState: Bundle?) { 
+        super.onCreate(savedInstanceState) 
+        setContentView(R.layout.activity_main) 
+    } 
+} 
+ 
+activity_main.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:gravity="center" 
+    android:orientation="vertical" 
+    android:background="#FFFFFF"> 
+ 
+    <TextView 
+        android:id="@+id/welcomeText" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Welcome, Android Mobile Class !" 
+        android:textSize="24sp" 
+        android:textColor="#000000" 
+        android:textStyle="bold" /> 
+</LinearLayout>

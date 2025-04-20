@@ -1,0 +1,212 @@
+//MainActivity.kt: 
+package com.example.todolistapp 
+import android.os.Bundle 
+import android.widget.Button 
+import android.widget.EditText 
+import androidx.activity.ComponentActivity 
+import androidx.recyclerview.widget.LinearLayoutManager 
+import androidx.recyclerview.widget.RecyclerView 
+class MainActivity : ComponentActivity() { 
+    private lateinit var taskRepository: TaskRepository 
+    private lateinit var taskAdapter: TaskAdapter 
+    private lateinit var tasks: MutableList<Task> 
+    override fun onCreate(savedInstanceState: Bundle?) { 
+        super.onCreate(savedInstanceState) 
+        setContentView(R.layout.activity_main) 
+        taskRepository = TaskRepository(this) 
+        tasks = taskRepository.getTasks().toMutableList() 
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView) 
+        recyclerView.layoutManager = LinearLayoutManager(this) 
+        taskAdapter = TaskAdapter(tasks, 
+            onUpdate = { task -> 
+                taskRepository.updateTask(task) 
+                refreshTasks() 
+            }, 
+            onDelete = { id -> 
+
+ 
+                taskRepository.deleteTask(id) 
+                refreshTasks() 
+            } 
+        ) 
+        recyclerView.adapter = taskAdapter 
+        val addTaskButton = findViewById<Button>(R.id.addTaskButton) 
+        val taskEditText = findViewById<EditText>(R.id.taskEditText) 
+        addTaskButton.setOnClickListener { 
+            val title = taskEditText.text.toString() 
+            if (title.isNotEmpty()) { 
+                taskRepository.addTask(title) 
+                taskEditText.text.clear() 
+                refreshTasks() 
+            } 
+        } 
+    } 
+    private fun refreshTasks() { 
+        tasks.clear() 
+        tasks.addAll(taskRepository.getTasks()) 
+        taskAdapter.notifyDataSetChanged() 
+    } 
+} 
+ 
+//Task.kt: 
+package com.example.todolistapp 
+data class Task(val id: Int, val title: String, val isCompleted: Boolean) 
+ 
+//TaskAdapter.kt: 
+package com.example.todolistapp 
+import android.view.LayoutInflater 
+import android.view.View 
+import android.view.ViewGroup 
+
+ 
+import android.widget.Button 
+import android.widget.CheckBox 
+import android.widget.TextView 
+import androidx.recyclerview.widget.RecyclerView 
+class TaskAdapter(private val tasks: MutableList<Task>, private val onUpdate: (Task) -> Unit, 
+private val onDelete: (Int) -> Unit) : 
+    RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() { 
+    class TaskViewHolder(view: View) : RecyclerView.ViewHolder(view) { 
+        val title: TextView = view.findViewById(R.id.taskTitle) 
+        val checkBox: CheckBox = view.findViewById(R.id.taskCheckBox) 
+        val deleteButton: Button = view.findViewById(R.id.deleteButton) 
+    } 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder { 
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task, parent, false) 
+        return TaskViewHolder(view) 
+    } 
+    override fun onBindViewHolder(holder: TaskViewHolder, position: Int) { 
+        val task = tasks[position] 
+        holder.title.text = task.title 
+        holder.checkBox.isChecked = task.isCompleted 
+        holder.checkBox.setOnCheckedChangeListener { _, isChecked -> 
+            onUpdate(task.copy(isCompleted = isChecked)) 
+        } 
+        holder.deleteButton.setOnClickListener { 
+            onDelete(task.id) 
+        } 
+    } 
+    override fun getItemCount() = tasks.size 
+} 
+ 
+ 
+ 
+ 
+//TaskDbHelper.kt: 
+package com.example.todolistapp 
+import android.content.ContentValues 
+import android.content.Context 
+import android.database.sqlite.SQLiteDatabase 
+import android.database.sqlite.SQLiteOpenHelper 
+class TaskDbHelper(context: Context) : SQLiteOpenHelper(context, "tasks.db", null, 1) { 
+    override fun onCreate(db: SQLiteDatabase?) { 
+        db?.execSQL("CREATE TABLE tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, title 
+TEXT, isCompleted INTEGER)") 
+    } 
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) { 
+        db?.execSQL("DROP TABLE IF EXISTS tasks") 
+        onCreate(db) 
+    } 
+    fun addTask(title: String) { 
+        val db = writableDatabase 
+        val values = ContentValues().apply { 
+            put("title", title) 
+            put("isCompleted", 0) 
+        } 
+        db.insert("tasks", null, values) 
+        db.close() 
+    } 
+    fun getTasks(): List<Task> { 
+        val tasks = mutableListOf<Task>() 
+        val db = readableDatabase 
+        val cursor = db.rawQuery("SELECT * FROM tasks", null) 
+        while (cursor.moveToNext()) { 
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow("id")) 
+            val title = cursor.getString(cursor.getColumnIndexOrThrow("title")) 
+            val isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow("isCompleted")) == 1 
+ 
+ 
+            tasks.add(Task(id, title, isCompleted)) 
+        } 
+        cursor.close() 
+        db.close() 
+        return tasks 
+    } 
+    fun updateTask(task: Task) { 
+        val db = writableDatabase 
+        val values = ContentValues().apply { 
+            put("title", task.title) 
+            put("isCompleted", if (task.isCompleted) 1 else 0) 
+        } 
+        db.update("tasks", values, "id = ?", arrayOf(task.id.toString())) 
+        db.close() 
+    } 
+    fun deleteTask(id: Int) { 
+        val db = writableDatabase 
+        db.delete("tasks", "id = ?", arrayOf(id.toString())) 
+        db.close() 
+    } 
+} 
+ 
+//TaskRepository.kt: 
+package com.example.todolistapp 
+import android.content.Context 
+class TaskRepository(context: Context) { 
+    private val dbHelper = TaskDbHelper(context) 
+    fun addTask(title: String) { 
+        dbHelper.addTask(title) 
+    } 
+    fun getTasks(): List<Task> { 
+        return dbHelper.getTasks() 
+ 
+ 
+    } 
+    fun updateTask(task: Task) { 
+        dbHelper.updateTask(task) 
+    } 
+    fun deleteTask(id: Int) { 
+        dbHelper.deleteTask(id) 
+    }  } 
+ 
+//activity_main.xml: 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:orientation="vertical"> 
+    <EditText 
+        android:id="@+id/taskEditText" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:hint="Enter Task" /> 
+    <Button 
+        android:id="@+id/addTaskButton" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Add Task" /> 
+    <androidx.recyclerview.widget.RecyclerView 
+        android:id="@+id/recyclerView" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" /> 
+</LinearLayout> 
+ 
+//Item_task.xml: 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+ 
+ 
+    android:layout_height="wrap_content" 
+    android:orientation="horizontal"> 
+    <CheckBox 
+        android:id="@+id/taskCheckBox" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" /> 
+    <TextView 
+        android:id="@+id/taskTitle" 
+        android:layout_width="0dp" 
+        android:layout_height="wrap_content"/> 
+    <Button 
+        android:id="@+id/deleteButton" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Delete" /> 
+</LinearLayout>

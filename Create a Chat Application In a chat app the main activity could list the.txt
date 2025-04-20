@@ -1,0 +1,281 @@
+//MainActivity.kt: 
+package com.example.chatapp 
+ 
+import android.content.Intent 
+import android.os.Bundle 
+import androidx.activity.ComponentActivity 
+import androidx.recyclerview.widget.LinearLayoutManager 
+import androidx.recyclerview.widget.RecyclerView 
+ 
+class MainActivity : ComponentActivity() { 
+    private lateinit var recyclerView: RecyclerView 
+    private lateinit var adapter: ContactAdapter 
+ 
+    override fun onCreate(savedInstanceState: Bundle?) { 
+        super.onCreate(savedInstanceState) 
+        setContentView(R.layout.activity_main) 
+ 
+        recyclerView = findViewById(R.id.recyclerViewContacts) 
+        recyclerView.layoutManager = LinearLayoutManager(this) 
+ 
+        val contacts = listOf( 
+            Contact("1", "Alice"), 
+            Contact("2", "Bob"), 
+            Contact("3", "Charlie") 
+        ) 
+ 
+        adapter = ContactAdapter(contacts) { contact -> 
+            val intent = Intent(this, ChatActivity::class.java) 
+            intent.putExtra("CONTACT_ID", contact.id) 
+            intent.putExtra("CONTACT_NAME", contact.name) 
+            startActivity(intent) 
+        } 
+ 
+        recyclerView.adapter = adapter 
+    } 
+} 
+
+ 
+//ChatActivity.kt:  
+package com.example.chatapp 
+ 
+import android.os.Bundle 
+import androidx.activity.ComponentActivity 
+import androidx.recyclerview.widget.LinearLayoutManager 
+import androidx.recyclerview.widget.RecyclerView 
+import android.widget.Button 
+import android.widget.EditText 
+ 
+class ChatActivity : ComponentActivity() { 
+    private lateinit var recyclerView: RecyclerView 
+    private lateinit var adapter: ChatAdapter 
+    private lateinit var messageInput: EditText 
+    private lateinit var sendButton: Button 
+ 
+    private var messages = mutableListOf<ChatMessage>() 
+    private var contactName: String? = null 
+ 
+    override fun onCreate(savedInstanceState: Bundle?) { 
+        super.onCreate(savedInstanceState) 
+        setContentView(R.layout.activity_chat) 
+ 
+        recyclerView = findViewById(R.id.recyclerViewChat) 
+        messageInput = findViewById(R.id.messageInput) 
+        sendButton = findViewById(R.id.sendButton) 
+ 
+        recyclerView.layoutManager = LinearLayoutManager(this) 
+ 
+        contactName = intent.getStringExtra("CONTACT_NAME") 
+        adapter = ChatAdapter(messages) 
+        recyclerView.adapter = adapter 
+ 
+        sendButton.setOnClickListener { 
+            val text = messageInput.text.toString() 
+            if (text.isNotEmpty()) { 
+                messages.add(ChatMessage("Me", text)) 
+                adapter.notifyItemInserted(messages.size - 1) 
+                recyclerView.scrollToPosition(messages.size - 1) 
+                messageInput.text.clear() 
+            } 
+        } 
+    } 
+} 
+
+ 
+//ChatAdapter.kt: 
+package com.example.chatapp 
+ 
+import android.view.LayoutInflater 
+import android.view.View 
+import android.view.ViewGroup 
+import android.widget.TextView 
+import androidx.recyclerview.widget.RecyclerView 
+ 
+class ChatAdapter(private val messages: List<ChatMessage>) : 
+    RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() { 
+ 
+    class ChatViewHolder(view: View) : RecyclerView.ViewHolder(view) { 
+        val messageText: TextView = view.findViewById(R.id.messageText) 
+    } 
+ 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): 
+ChatViewHolder { 
+        val view = LayoutInflater.from(parent.context) 
+            .inflate(R.layout.item_message, parent, false) 
+        return ChatViewHolder(view) 
+    } 
+ 
+    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) { 
+        holder.messageText.text = messages[position].message 
+    } 
+ 
+    override fun getItemCount() = messages.size 
+} 
+ 
+ChatMessage.kt: 
+package com.example.chatapp 
+data class ChatMessage( 
+    val senderId: String, 
+    val message: String 
+) 
+Contact.kt: 
+package com.example.chatapp 
+data class Contact( 
+    val id: String, 
+    val name: String 
+) 
+
+ 
+ContactAdapter.kt: 
+package com.example.chatapp 
+ 
+import android.view.LayoutInflater 
+import android.view.View 
+import android.view.ViewGroup 
+import android.widget.TextView 
+import androidx.recyclerview.widget.RecyclerView 
+ 
+class ContactAdapter( 
+    private val contacts: List<Contact>, 
+    private val onClick: (Contact) -> Unit 
+) : RecyclerView.Adapter<ContactAdapter.ContactViewHolder>() { 
+ 
+    class ContactViewHolder(view: View) : RecyclerView.ViewHolder(view) { 
+        val nameText: TextView = view.findViewById(R.id.contactName) 
+    } 
+ 
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): 
+ContactViewHolder { 
+        val view = LayoutInflater.from(parent.context) 
+            .inflate(R.layout.item_contact, parent, false) 
+        return ContactViewHolder(view) 
+    } 
+ 
+    override fun onBindViewHolder(holder: ContactViewHolder, position: Int) { 
+       val contact = contacts[position] 
+        holder.nameText.text = contact.name 
+        holder.itemView.setOnClickListener { onClick(contact) } 
+    } 
+ 
+    override fun getItemCount() = contacts.size 
+} 
+ 
+//activity_main.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:orientation="vertical" 
+    android:padding="16dp"> 
+ 
+    <TextView 
+ 
+ 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:text="Contacts" 
+        android:textSize="22sp" 
+        android:textStyle="bold" 
+        android:layout_gravity="center_horizontal" 
+        android:paddingBottom="10dp" /> 
+ 
+    <androidx.recyclerview.widget.RecyclerView 
+        android:id="@+id/recyclerViewContacts" 
+        android:layout_width="match_parent" 
+        android:layout_height="match_parent" 
+        android:divider="@android:color/darker_gray" 
+        android:dividerHeight="1dp"/> 
+</LinearLayout> 
+ 
+//activity_chat.XML: 
+<?xml version="1.0" encoding="utf-8"?> 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="match_parent" 
+    android:orientation="vertical"> 
+ 
+    <TextView 
+        android:id="@+id/chatTitle" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:text="Chat" 
+        android:textSize="20sp" 
+        android:textStyle="bold" 
+        android:padding="10dp" 
+        android:gravity="center" 
+        android:background="#E0E0E0" /> 
+ 
+    <androidx.recyclerview.widget.RecyclerView 
+        android:id="@+id/recyclerViewChat" 
+        android:layout_width="match_parent" 
+        android:layout_height="0dp" 
+        android:layout_weight="1" 
+        android:padding="10dp"/> 
+ 
+    <LinearLayout 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+
+ 
+        android:orientation="horizontal" 
+        android:padding="10dp" 
+        android:background="#F5F5F5"> 
+ 
+        <EditText 
+            android:id="@+id/messageInput" 
+            android:layout_width="0dp" 
+            android:layout_weight="1" 
+            android:layout_height="wrap_content" 
+            android:hint="Type a message" 
+            android:padding="10dp"/> 
+ 
+        <Button 
+            android:id="@+id/sendButton" 
+            android:layout_width="wrap_content" 
+            android:layout_height="wrap_content" 
+            android:text="Send"/> 
+    </LinearLayout> 
+</LinearLayout> 
+ 
+//Item_contact.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="wrap_content" 
+    android:orientation="horizontal" 
+    android:padding="12dp" 
+    android:background="?android:attr/selectableItemBackground" 
+    android:clickable="true"> 
+ 
+    <TextView 
+        android:id="@+id/contactName" 
+        android:layout_width="match_parent" 
+        android:layout_height="wrap_content" 
+        android:text="Contact Name" 
+        android:textSize="18sp" 
+        android:padding="8dp"/> 
+</LinearLayout> 
+
+
+//Item_message.xml: 
+<?xml version="1.0" encoding="utf-8"?> 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+    android:layout_width="match_parent" 
+    android:layout_height="wrap_content" 
+
+ 
+    android:orientation="horizontal" 
+    android:padding="8dp"> 
+ 
+    <TextView 
+        android:id="@+id/messageText" 
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content" 
+        android:padding="10dp" 
+        android:text="Message here" 
+        android:textSize="16sp" 
+        android:background="#D1C4E9" 
+        android:layout_marginEnd="8dp" 
+        android:layout_marginStart="8dp" 
+        android:layout_marginBottom="5dp"/> 
+</LinearLayout>
